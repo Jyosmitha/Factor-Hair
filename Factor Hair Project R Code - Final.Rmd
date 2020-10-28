@@ -1,0 +1,330 @@
+---
+title: "Factor Hair"
+author: "Jyosmitha"
+date: "3/21/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+
+```{r, `echo = FALSE`}
+setwd("C:/Users/ammu/Desktop/Great Lakes/3. Advanced Statistics/Project")
+getwd()
+factorData=read.csv("Factor-Hair-Revised.csv")
+attach(factorData)
+library(nFactors)
+library(psych)
+library(car)
+library(corrplot)
+library(ggplot2)
+library(DataExplorer)
+finalData=factorData[,2:12]
+names(finalData)
+```
+
+1. Perform exploratory data analysis on the dataset. Showcase some charts, graphs. Check for outliers and missing values.
+
+1.1 EDA - Basic data summary, Univariate, Bivariate analysis, graphs
+
+Ans: R functions like View, head, tail, dim, names, str, summary etc can be used for performing EDA.
+
+Univariate Analysis:
+
+With the help of density plots and histograms, the skewness in the variables of the dataset can be explained as below:
+
+Normal distributed: advertising, complaint Resolution, competitative pricing, ID
+left skew: Delivery speed, ordbilling, tech sup
+right skew:ecommerce,satisfaction
+
+Bivariate analysis is explained in next section.
+
+```{r}
+
+View(factorData)
+head(factorData)
+tail(factorData)
+dim(factorData)
+names(factorData)
+summary(factorData)
+str(factorData)
+plot_histogram(factorData, title = "Histogram for independent Variables")
+plot_density(factorData, title= "Density plot for independent Variables")
+```
+
+1.2 EDA - Check for Outliers and missing values and check the summary of the dataset
+
+Ans: There are no missing values/ Null values in the entire data set in all the columns anyNA and is.na can be used to find out missing values.
+
+Outliers are found in Ecom, SalesFImage, Ordbilling variables. Box plots can be used to identify the same.
+
+```{r}
+
+sum(is.na(factorData))
+anyNA(factorData)
+summary(factorData)
+boxplot1=boxplot(ProdQual,Ecom,TechSup,CompRes,Advertising,ProdLine
+        ,names = c("ProdQual","Ecom","TechSup","CompRes","Advertising","ProdLine")
+        ,col = c("Red","green","Pink","yellow","Orange","Light Blue")
+        ,main="Box plot Analysis-1")
+boxplot1
+
+boxplot2=boxplot(SalesFImage,ComPricing,WartyClaim,OrdBilling,DelSpeed,Satisfaction
+        ,names = c("SalesFImage","ComPricing","WartyClaim","OrdBilling","DelSpeed","Satisfaction")
+        ,col = c("Red","green","Pink","yellow","Orange","Light Blue")
+        ,main="Box plot Analysis-2")
+boxplot2
+
+```
+
+2.  Is there evidence of multicollinearity ? Showcase your analysis(6 marks)
+
+```{r}
+multicollinearmodel=lm(Satisfaction~.,data=finalData)
+summary(multicollinearmodel)
+vif(multicollinearmodel)
+```
+
+The VIF Value of few original variables in dataset are >2 and our dataset has variables which are having multi-collinearity
+
+Below is the threshold values for multicollinearity check
+
+a. <2 -> No collinearity
+b. >2 and <4-5 -> Moderately collinear
+c. >5 Highly collinear
+
+A correlation plot can also be plotted to check the correlation among the variables.
+
+Multi collinearity exists in the data set and below are the variables which have a high correlation.
+
+E-commerce and salesForceImage=0.79
+Technical Support and Warranty and claims=0.8
+Complaint resolution and Order and billing=0.76
+Complaint resolution and deliverySpeed=0.87
+Order and billing and deliverySpeed =0.75
+
+This collinear variables should be grouped into a single factors
+
+If there is a collinearity among the variables, it will affect out regression model output as effect on one variable will also cause the effect on another variable.
+
+```{r}
+corrplot(cor(finalData),method="number",type="upper")
+
+scatterplot1=plot(Ecom,SalesFImage, col="Red",main="Scatter Plot of Ecommerce and Salesforce Image")
+scatterplot1
+
+scatterplot2=plot(TechSup,WartyClaim, col="Red",main="Scatter Plot of Technical Support, Warranty and Claims")
+scatterplot2
+
+scatterplot3=plot(CompRes,OrdBilling, col="Red",main="Scatter Plot of Complaint Resolution and Ordered Billing")
+scatterplot3
+
+scatterplot4=plot(CompRes,DelSpeed, col="Red",main="Scatter Plot of Complaint Resolution and delivery speed")
+scatterplot4
+
+scatterplot5=plot(OrdBilling,DelSpeed, col="Red",main="Scatter Plot of Odered billing and Delivery Speed")
+scatterplot5
+
+```
+
+3. Perform  simple linear regression for the dependent variable with every independent variable (6 marks)
+
+The general equation for simple linear regression is below:
+
+yhat=beta0+beta1*X1 where
+
+yhat = dependent variable
+beta0= constant/intercept coefficient
+beta1= slope/ variable coefficient/regression coefficient
+X1= independent variable
+
+The simple linear regression equations against each variable are given below:
+
+Equation: yhat=3.67593+0.41512xProdQual
+For one unit change in ProdQual, Satisfaction would improve by 0.41512 keeping other independent varialbes constant
+
+Equation: yhat=5.1516+0.4811xEcom
+For one unit change in Ecom, Satisfaction would improve by 0.4811 keeping other independent varialbes constant
+
+Equation: yhat=6.44757+0.08768xTechSup
+For one unit change in TechSup, Satisfaction would improve by 0.08768 keeping other independent varialbes constant
+
+Equation: yhat=3.68005+0.59499xCompRes
+For one unit change in CompRes, Satisfaction would improve by 0.59499 keeping other independent varialbes constant
+
+Equation: yhat=5.6259+0.3222xAdvertising
+For one unit change in Advertising, Satisfaction would improve by 0.3222 keeping other independent varialbes constant
+
+Equation: yhat=4.02203+0.49887xProdLine
+For one unit change in ProdLine, Satisfaction would improve by 0.49887 keeping other independent varialbes constant
+
+Equation: yhat=4.06983+0.55596xSalesFImage
+For one unit change in SalesFImage, Satisfaction would improve by 0.55596 keeping other independent varialbes constant
+
+Equation: yhat=8.03856-0.16068xComPricing
+For one unit change in ComPricing, Satisfaction would decrease by 0.16068 keeping other independent varialbes constant
+
+Equation: yhat=5.3581+0.2581xWartyClaim
+For one unit change in WartyClaim, Satisfaction would improve by 0.2581 keeping other independent varialbes constant
+
+Equation: yhat=4.0541+0.6695xOrdBilling
+For one unit change in OrdBilling, Satisfaction would improve by 0.6695 keeping other independent varialbes constant
+
+Equation: yhat=3.2791+0.9364xDelSpeed
+For one unit change in DelSpeed, Satisfaction would improve by 0.9364 keeping other independent varialbes constant
+
+
+As per Simple Linear regression analysis, it is found that all the independent variables (ProdQual,Ecom,CompRes,Advertising,ProdLine,SalesFImage,ComPricing,OrdBilling,DelSpeed,DelSpeed) except (TechSup,wrtClaim)are significant on the dependent variable (Satisfaction). As per the R-Square value, a single variable cannot be taken into consideration for explaining the variation in the dependent variable.
+
+```{r}
+summary(lm(Satisfaction~ProdQual,data=finalData))
+summary(lm(Satisfaction~Ecom,data=finalData))
+summary(lm(Satisfaction~TechSup,data=finalData))
+summary(lm(Satisfaction~CompRes,data=finalData))
+summary(lm(Satisfaction~Advertising,data=finalData))
+summary(lm(Satisfaction~ProdLine,data=finalData))
+summary(lm(Satisfaction~SalesFImage,data=finalData))
+summary(lm(Satisfaction~ComPricing,data=finalData))
+summary(lm(Satisfaction~WartyClaim,data=finalData))
+summary(lm(Satisfaction~OrdBilling,data=finalData))
+summary(lm(Satisfaction~DelSpeed,data=finalData))
+```
+
+4. #Perform PCA/Factor analysis by extracting 4 factors. Interpret the output and name the Factors (20 marks)
+
+4.1 Perform PCA/FA and Interpret the Eigen Values (apply Kaiser Normalization Rule)
+
+We have to check if PCA can be performed with bartlett test on the given dataset and find if variables are correlated and if the data is enough or not. Below is the null and alternate Hypothesis for performing the test.
+
+Null Hypothesis: We cannot perform PCA on the given dataset
+Alternate Hypothesis: We can perform PCA on the given dataset
+
+From the below output, the P-value obtained is very low (1.79337e-96) and less significant. Hence we reject the null Hypothesis. So, PCA can be performed.
+
+We can calculate the eigen values with function "eigen". These values helps us in choosing how many components to make without loosing the variance explaination. The eigen vectors tells us the direction
+
+As per Kaiser Normalization Rule,eigen values >1 are considered to be as each factor. Here 4 variables are having eigen values >1. Hence were are taking 4 factors.
+
+As per scree plot, the factors which are below the elbow bent can be ignored. This process also leaves us with 4 factors.
+
+
+```{r}
+print(cortest.bartlett(finalData,nrow(factorData)))
+ev=eigen(cor(finalData))
+print(ev,digit=5)
+eigenValue=ev$values
+eigenValue
+Factors=c(1,2,3,4,5,6,7,8,9,10,11)
+Scree=data.frame(Factors,eigenValue)
+plot(Scree,main="Scree plot for Factor Hair",col="Blue",ylim=c(0,4))
+lines(Scree,col="Red")
+```
+
+
+4.2 Output Interpretation Tell why only 4 factors are being asked in the questions and tell whether it is correct in choosing 4 factors. Name the factors with correct explanations.
+
+The number of factors choice is dependent on how much % of individual variation is being explained. In our output, the first 4 eigen values (31.1542848 23.1899701 15.3725134  9.8777823) are explaning good percentage of variation. Followed by them, there is a drop in the eigen value percentage and hence they are not quite useful in explaning the variation in data
+
+We can choose either more than 4 factors in our scenario to explain more variation in the data, but it will lead to multi collinearity issue and our regression model won't be accurate and hence not suggested.
+
+Also as per the scree plot/kaiser normalisation rule, it is advised to take 4 factors only.
+
+The variables which have high correlation are grouped into 4 factors as below:
+
+1. Purchases: comprises of variables which explains after the product is bought by the customer
+2. Marketing: variables which explain about the publicity of the product in the market
+3. Customer Care: variables which explains the support offered to customers once the product is bought
+4. Product Position: variables which explains the basic details of the product
+
+Component 1:	Complaint Resolution, Order Billing, Delivery Speed (Purchases)
+Component 2:	Ecommerce,Advertising, Salesforce Image (Marketing)
+Component 3:	Technical Support, Warranty and Claims (Customer Care)
+Component 4:	Product Quality, Product Line,Competitative Pricing (Product Position)
+
+
+```{r}
+
+part.pca=eigenValue/sum(eigenValue)*100
+part.pca
+Unrorate=principal(finalData,nfactors = 4,rotate="none")
+#print(Unrorate,digits=4)
+Rotate=principal(finalData,nfactors = 4,rotate="varimax")
+print(Rotate,digits=4)
+
+```
+
+5.Perform Multiple linear regression with customer satisfaction as dependent variables and the four factors as independent variables. Comment on the Model output and validity. Your remarks should make it meaningful for everybody
+
+5.1 Create a data frame with a minimum of 5 columns, 4 of which are different factors and the 5th column is Customer Satisfaction
+
+Ans:  we take the respective factor scores which explains the underlying variables a whole and create a dataframe alone the with predicted/dependent variable (satisfaction)
+
+Using cbind data frame can be created as below and I have named the colum names of data frame in accordance with the component names as below:
+
+"Satisfaction"  "Purchases"     "Marketing"     "Customer Care"
+"Product Line"
+
+```{r}
+factorDf=cbind(factorData$Satisfaction,Rotate$scores)
+factorDf=as.data.frame(factorDf)
+names(factorDf)=c("Satisfaction","Purchases","Marketing","Customer Care","Product Position")
+names(factorDf)
+```
+
+5.2 Perform Multiple Linear Regression with Customer Satisfaction as the Dependent Variable and the four factors as Independent Variables
+
+Ans: MLR can be performed with function lm (linear mode) and predicted/dependent variable should be a function of factors/independent variable
+
+```{r}
+model=lm(Satisfaction~.,data=factorDf)
+summary(model)
+vif(model)
+
+finalcorPlot=corrplot(cor(factorDf),method="number")
+finalcorPlot
+
+actualSatisfaction=factorData$Satisfaction
+predictedSatisfaction=predict(model)
+is.data.frame(predictedSatisfaction)
+predictedSatisfaction=as.data.frame(predictedSatisfaction)
+modelValidity=cbind(actualSatisfaction,predictedSatisfaction)
+
+plot(modelValidity$predictedSatisfaction,col="Red",xlab = "Customers", ylab = "Satisfaction", main="Model Validity Graph")
+lines(modelValidity$predictedSatisfaction,col="Red")
+lines(modelValidity$actualSatisfaction,col="Blue")
+
+```
+
+5.3 MLR summary interpretation and significance (R, R2, Adjusted R2,Degrees of Freedom, f-statistic, coefficients along with p-values)
+
+Ans: 
+
+Regression equation: Satisfaction=  6.91800 +0.61805*Purchases + 0.50973*0.50973+  0.06714* Customer care+ 0.54032*Product Position
+
+Significance : The components Purchases, Marketing and Productline shows more significance on satisfaction variable. Customer care component doesn't seems to have much significance.
+
+Multiple R-square:
+
+Adjusted R-square: Helps us in suggesting how the % of variation explaination is being done when the degree of freedom is adjusted by adding more number of relevant variables. In our mode about 64.62% is the adjusted R-square and it is calculated as: (1-R)*(n-1)/(n-k-1).
+
+Degrees of Freedom: Here we are predicting 5 variables. Hence Numerator DF=5-1=4. We have 100 observation, hence total DF= 100-1=99. Denomination DF= 99-4=95
+
+F-statistic: 
+
+Coefficients along with p-values:
+
+Model Output and validity:
+
+The VIF (variable Inflation Factor) for this model is showing 1. Hence there is no multi collinearity exists in the model anymore.
+
+Note: According to thumb rule, if VIF is <2, there regression model is assumed to be free from multi collinearity.
+
+Also, the graph of actual Satisfaction (train dataset) vs Predicted satisfaction (test dataset) is almost similar. Hence our regression model has good validity
+
+5.4 Output Interpretation <making it meaningful for everybody>
+
+The satisfaction of the customer primarily influenced by how much faster the product is billed and delivered along with how quickly the customer complaints are resolved by the company. The adverstisments and the publicity of the product in social media and in the market also plays a descent role and followed by the product quality and its relative price with other products.
+
+However, the services offered after the purchase of the product like  warranty & claims and technical support are not quite playing a role in the customer satisfaction. 
+
+Hence the company must focus on pre-purchase activities than post-purchase activities
